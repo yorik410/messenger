@@ -5,34 +5,34 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 
 class LoginForm(FlaskForm):
-    email = EmailField('Почта', validators=[DataRequired()])
-    password = PasswordField('Пароль', validators=[DataRequired()])
-    remember_me = BooleanField('Запомнить меня')
-    submit = SubmitField('Войти')
+    email = StringField('Nickname or email', validators=[DataRequired()])
+    password = PasswordField('Password', validators=[DataRequired()])
+    remember_me = BooleanField('Remember me')
+    submit = SubmitField('Log in')
 
-    def set_password(self, password):
+    def set_password(self, password):  # Вроде не нужно
         self.hashed_password = generate_password_hash(password)
 
-    def check_password(self, password):
+    def check_password(self, password):  # Вроде не нужно
         return check_password_hash(self.hashed_password, password)
 
 
 class RegisterForm(FlaskForm):
-    email = EmailField('Почта', validators=[DataRequired()])
-    # surname = StringField('Фамилия', validators=[DataRequired()])
-    # name = StringField('Имя', validators=[DataRequired()])
-    # age = IntegerField("Возраст", validators=[DataRequired()])
-    # password = PasswordField('Пароль', validators=[DataRequired()])
-    # password_again = PasswordField('Повторите пароль',
-    #                                validators=[DataRequired()])
-    # position = StringField("Должность")
-    # speciality = StringField("Специальность")
-    # address = StringField("Адрес")
-    # city_from = StringField("Родной город", validators=[DataRequired()])
-    submit = SubmitField('Зарегистрироваться')
+    email = EmailField('Email', validators=[DataRequired()])
+    nickname = StringField('Nickname', validators=[DataRequired()])
+    surname = StringField('Surname (optional)')
+    name = StringField('Name', validators=[DataRequired()])
+    age = IntegerField("Age", validators=[DataRequired()])
+    password = PasswordField('Password', validators=[DataRequired()])
+    password_again = PasswordField('Repeat password',
+                                   validators=[DataRequired()])
+    submit = SubmitField('Register')
 
-    def set_password(self, password):
+    def set_password(self, password):  # Вроде не нужно
         self.hashed_password = generate_password_hash(password)
 
-    def check_password(self, password):
+    def get_hashed_password(self):
+        return generate_password_hash(self.password.data)
+
+    def check_password(self, password):  # Вроде не нужно
         return check_password_hash(self.hashed_password, password)
