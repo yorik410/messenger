@@ -4,8 +4,11 @@ from flask import render_template, redirect
 from db_scripts import db_session
 from db_scripts.data.users import User
 from db_scripts.forms.login_form import LoginForm, RegisterForm
+import os
+import sys
 
-app = Flask(__name__)
+static_path = os.path.join("\\".join(sys.argv[0].split("\\")[:-1]), "src")
+app = Flask(__name__, static_folder=static_path)
 
 app.config['SECRET_KEY'] = 'yandexlyceum_secret_key'
 
