@@ -2,9 +2,42 @@
 
 {% block content %}
 
+    {% if current_user.is_authenticated %}
+        <div>
+            <div class="scroll">
+                <div class="p-3">
+                    <img src="{{ url_for('static', filename='img/user-profile-icon.png') }}" width="60" height="60" alt="">
+                    <span>Name</span>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <center class="p-3 bg-dark" style="position: absolute; top: 50%; transform: translate(-50%, -50%); left: 50%;
+                        border: 2px solid black;">
+            <div style="margin-bottom: 7px;">You have not logged in, yet</div>
+            <div>
+                <span class="p-2">You should</span>
+                <a class="btn btn-success" href="/login">Log in</a>
+                <span class="p-1">or</span>
+                <a class="btn btn-primary" href="/register">Register</a>
+            </div>
+        </center>
+    {% endif %}
+
 {% endblock %}
 
 
 {% block head %}
-
+    <style>
+        div.scroll {
+            margin:4px, 4px;
+            padding:4px;
+            background-color: #212529;
+            width: 500px;
+            height: 85vh;
+            overflow-x: hidden;
+            overflow-y: auto;
+            text-align:justify;
+        }
+    </style>
 {% endblock %}
