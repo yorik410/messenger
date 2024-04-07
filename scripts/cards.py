@@ -14,8 +14,10 @@ class ContactCard:
             self.showed_name = contact.nickname
         else:
             self.showed_name = contact.surname + " " + contact.name if contact.surname else contact.name
-        forward = chat.messages
-        reverse = db_sess.query(Chat).filter(Chat.user_id == chat.contact, Chat.contact == chat.user_id).first().messages
+        forward = chat
+        reverse = db_sess.query(Chat).filter(Chat.user_id == chat.contact, Chat.contact == chat.user_id).first()
+        reverse = reverse.messages if reverse else None
+        forward = forward.messages if forward else None
         if reverse and forward:
             self.last_message = max([reverse[-1], forward[-1]], key=lambda x: x.date_time).text
         elif reverse:

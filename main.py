@@ -114,8 +114,9 @@ def chat(id:int):
     else:
         contacts = []
     chat = db_sess.query(Chat).get(id)
-    forward = chat.messages
-    reverse = db_sess.query(Chat).filter(Chat.user_id == chat.contact, Chat.contact == chat.user_id).first().messages
+    forward = chat.messages if chat else []
+    reverse = db_sess.query(Chat).filter(Chat.user_id == chat.contact, Chat.contact == chat.user_id).first()
+    reverse = reverse.messages if reverse else []
     messages = list(sorted(forward + reverse, key=lambda x: x.date_time))
     form = SendMessageForm()
     if form.validate_on_submit():
@@ -182,4 +183,5 @@ def logout():
 if __name__ == '__main__':
     db_session.global_init("db/messenger.db")
     # app.run(port=8080, host='127.0.0.1')
+    # ngrok http --domain=loved-cute-dodo.ngrok-free.app 8080
     app.run(port=8080, host='0.0.0.0')
