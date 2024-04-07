@@ -15,6 +15,7 @@ from scripts.cards import ContactCard
 
 import os
 import sys
+import datetime
 
 static_path = os.path.join("\\".join(sys.argv[0].split("\\")[:-1]), "src")
 app = Flask(__name__, static_folder=static_path)
@@ -125,6 +126,7 @@ def chat(id:int):
         mess = Message()
         mess.chat_id = id
         mess.text = message_text
+        mess.date_time = datetime.datetime.now()
         db_sess.add(mess)
         db_sess.commit()
         return redirect(f"/chats/{id}")
@@ -179,4 +181,5 @@ def logout():
 
 if __name__ == '__main__':
     db_session.global_init("db/messenger.db")
-    app.run(port=8080, host='127.0.0.1')
+    # app.run(port=8080, host='127.0.0.1')
+    app.run(port=8080, host='0.0.0.0')
