@@ -9,6 +9,7 @@ class ContactCard:
         db_session.global_init("db/messenger.db")
         db_sess = db_session.create_session()
         contact = db_sess.query(User).get(chat.contact)
+        self.id = chat.id
         if contact.nickname:
             self.showed_name = contact.nickname
         else:

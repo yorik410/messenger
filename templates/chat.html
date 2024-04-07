@@ -1,0 +1,28 @@
+{% extends "index.html" %}
+{% block chat %}
+
+    {% for mess in messages %}
+        {% if mess.chat.user_id == user_id %}
+            <p class="bg-primary p-2 rounded-pill">{{ mess.text }}</p>
+        {% else %}
+            <p class="bg-dark p-2 rounded-pill">{{ mess.text }}</p>
+        {% endif %}
+    {% endfor %}
+
+{% endblock %}
+
+{% block message %}
+    <form action="" method="post">
+        {{ form.hidden_tag() }}
+        <table style="width: 100%;">
+            <tr>
+                <td class="p-1">
+                    {{ form.text(class="form-control form-control-sm", style="resize:none; height:7vh;", placeholder="Write a message...") }}
+                </td>
+                <td class="p-1">
+                    {{ form.submit(type="submit", class="btn btn-primary") }}
+                </td>
+            </tr>
+        </table>
+    </form>
+{% endblock %}
