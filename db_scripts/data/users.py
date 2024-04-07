@@ -22,6 +22,7 @@ class User(SqlAlchemyBase, UserMixin, SerializerMixin):
     hashed_password = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     modified_date = sqlalchemy.Column(sqlalchemy.DateTime,
                                       default=datetime.datetime.now)
+    contacts = orm.relationship("Chat", back_populates='user')
 
     # def __repr__(self):
     #     return f"<Colonist> {self.id} {self.surname} {self.name}"

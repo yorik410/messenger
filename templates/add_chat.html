@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="bg-dark p-3 rounded-3" style="width: 50vw; transform: translate(50%, 0);">
+        <h1>Add chat</h1>
+        <form action="" method="post">
+            {{ form.hidden_tag() }}
+            <p>
+                {{ form.nickname.label }}<br>
+                {{ form.nickname(class="form-control") }}<br>
+                {% for error in form.nickname.errors %}
+                    <div class="alert alert-danger" role="alert">
+                        {{ error }}
+                    </div>
+                {% endfor %}
+            </p>
+            <p>{{ form.submit(type="submit", class="btn btn-primary") }}</p>
+            <div>{{ message }}</div>
+        </form>
+    </div>
+{% endblock %}

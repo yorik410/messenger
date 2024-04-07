@@ -3,13 +3,38 @@
 {% block content %}
 
     {% if current_user.is_authenticated %}
-        <div>
-            <div class="scroll">
-                <div class="p-3">
-                    <img src="{{ url_for('static', filename='img/user-profile-icon.png') }}" width="60" height="60" alt="">
-                    <span>Name</span>
+        <div><table><tr>
+            <td>
+                <div class="scroll rounded-3">
+                    {% for user in contacts %}
+                        <a class="p-2 text-white" style="text-decoration: none;" href="/login">
+                            <div class="border p-1 border-secondary border-2 rounded-pill">
+                                <table>
+                                    <tr>
+                                        <td rowspan="2">
+                                            <img src="{{ url_for('static', filename='img/user-profile-icon.png') }}" width="60" height="60" alt="">
+                                        </td>
+                                        <td>
+                                            <span class="p-1" style="margin-left: 15px; font-size: 18px;">{{ user.showed_name }}</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <span class="p-1" style="margin-left: 15px; font-size: 14px;">{{ user.last_message }}</span>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </a>
+                    {% endfor %}
                 </div>
-            </div>
+            </td>
+            <td>
+
+            </td>
+        </tr></table></div><br>
+        <div>
+            <a href="/add_chat" class="btn btn-primary">+ Add chat</a>
         </div>
     {% else %}
         <center class="p-3 bg-dark" style="position: absolute; top: 50%; transform: translate(-50%, -50%); left: 50%;
@@ -34,7 +59,7 @@
             padding:4px;
             background-color: #212529;
             width: 500px;
-            height: 85vh;
+            height: 75vh;
             overflow-x: hidden;
             overflow-y: auto;
             text-align:justify;

@@ -2,8 +2,16 @@ from flask_login import LoginManager, login_user, logout_user, login_required, c
 from flask import Flask, jsonify, make_response
 from flask import render_template, redirect
 from db_scripts import db_session
+
 from db_scripts.data.users import User
+from db_scripts.data.chats import Chat
+from db_scripts.data.messages import Message
+
 from db_scripts.forms.login_form import LoginForm, RegisterForm
+from db_scripts.forms.add_chat import AddChatForm
+
+from scripts.cards import ContactCard
+
 import os
 import sys
 
@@ -38,8 +46,7 @@ def login():
             login_user(user, remember=form.remember_me.data)
             return redirect("/")
         return render_template('login.html',
-                               message="Wrong "
-                                       "login or password",
+                               message="Wrong login or password",
                                form=form)
     return render_template('login.html', title='Log in', form=form)
 
@@ -87,8 +94,47 @@ def register():
 @app.route("/")
 def index():
     db_sess = db_session.create_session()
+    # print(current_user.id)
+    if current_user.is_authenticated:
+        contacts = list(map(lambda x: ContactCard(x), db_sess.query(Chat).filter(Chat.user_id == current_user.id).all()))
+    else:
+        contacts = []
 
-    return render_template("index.html")
+    return render_template("index.html", title="Chats", contacts=contacts)
+
+
+@app.route("/add_chat", methods=['GET', 'POST'])
+def add_chat():
+    form = AddChatForm()
+    if form.validate_on_submit():
+        db_sess = db_session.create_session()
+        if not current_user.is_authenticated:
+            return render_template('add_chat.html',
+                                   message="You have not logged in, yet",
+                                   form=form)
+        user = db_sess.query(User).filter(User.nickname == form.nickname.data).all()
+        if len(user) == 0:
+            return render_template('add_chat.html',
+                                   message="Wrong nickname",
+                                   form=form)
+        user = user[0]
+        if current_user.id == user.id:
+            return render_template('add_chat.html',
+                                   message="You cannot add yourself in chat",
+                                   form=form)
+        if len(db_sess.query(Chat).filter(Chat.user_id == current_user.id, Chat.contact == user.id).all()) > 0:
+            return render_template('add_chat.html',
+                                   message="You already have this chat",
+                                   form=form)
+        chat = Chat(
+            user_id=current_user.id,
+            contact=user.id
+        )
+        db_sess.add(chat)
+        db_sess.commit()
+        return redirect("/")
+
+    return render_template("add_chat.html", title="Add chat", form=form)
 
 
 @app.route('/logout')
