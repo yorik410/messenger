@@ -16,6 +16,8 @@ from scripts.cards import ContactCard
 import os
 import sys
 import datetime
+from pynput import keyboard
+
 
 static_path = os.path.join("\\".join(sys.argv[0].split("\\")[:-1]), "src")
 app = Flask(__name__, static_folder=static_path)
@@ -42,6 +44,7 @@ def login():
             user = db_sess.query(User).filter(User.email == form.email.data).first()
         else:
             user = db_sess.query(User).filter(User.nickname == form.email.data).first()
+        db_sess.close()
         if user and user.check_password(form.password.data):
             if current_user.is_authenticated:
                 logout_user()
@@ -71,10 +74,12 @@ def register():
                                    message='Don\'t use "@" in nickname')
         db_sess = db_session.create_session()
         if db_sess.query(User).filter(User.email == form.email.data).first():
+            db_sess.close()
             return render_template('register.html', title='Register',
                                    form=form,
                                    message="User with this email already exists")
         if db_sess.query(User).filter(User.nickname == form.nickname.data).first():
+            db_sess.close()
             return render_template('register.html', title='Register',
                                    form=form,
                                    message="User with this nickname already exists")
@@ -89,6 +94,7 @@ def register():
         user.set_password(form.get_hashed_password())
         db_sess.add(user)
         db_sess.commit()
+        db_sess.close()
         return redirect('/login')
     return render_template('register.html', title='Register', form=form)
 
@@ -102,7 +108,7 @@ def index():
         contacts = list(map(lambda x: ContactCard(x), db_sess.query(Chat).filter(Chat.user_id == current_user.id).all()))
     else:
         contacts = []
-
+    db_sess.close()
     return render_template("index.html", title="Chats", contacts=contacts)
 
 
@@ -122,6 +128,7 @@ def chat(id:int):
     if form.validate_on_submit():
         message_text = form.text.data.strip()
         if not message_text:
+            db_sess.close()
             return render_template('chat.html', id=id, title="Chats", contacts=contacts, messages=messages,
                                    user_id=current_user.id, form=form)
         mess = Message()
@@ -130,6 +137,7 @@ def chat(id:int):
         mess.date_time = datetime.datetime.now()
         db_sess.add(mess)
         db_sess.commit()
+        db_sess.close()
         return redirect(f"/chats/{id}")
     return render_template('chat.html', id=id, title="Chats", contacts=contacts, messages=messages,
                            user_id=current_user.id, form=form)
@@ -141,23 +149,27 @@ def add_chat():
     if form.validate_on_submit():
         db_sess = db_session.create_session()
         if not current_user.is_authenticated:
+            db_sess.close()
             return render_template('add_chat.html',
                                    message="You have not logged in, yet",
                                    form=form,
                                    title="Add chat")
         user = db_sess.query(User).filter(User.nickname == form.nickname.data).all()
         if len(user) == 0:
+            db_sess.close()
             return render_template('add_chat.html',
                                    message="Wrong nickname",
                                    form=form,
                                    title="Add chat")
         user = user[0]
         if current_user.id == user.id:
+            db_sess.close()
             return render_template('add_chat.html',
                                    message="You cannot add yourself in chat",
                                    form=form,
                                    title="Add chat")
         if len(db_sess.query(Chat).filter(Chat.user_id == current_user.id, Chat.contact == user.id).all()) > 0:
+            db_sess.close()
             return render_template('add_chat.html',
                                    message="You already have this chat",
                                    form=form,
@@ -168,6 +180,7 @@ def add_chat():
         )
         db_sess.add(chat)
         db_sess.commit()
+        db_sess.close()
         return redirect("/")
 
     return render_template("add_chat.html", title="Add chat", form=form)

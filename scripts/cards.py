@@ -6,7 +6,6 @@ from db_scripts import db_session
 
 class ContactCard:
     def __init__(self, chat):
-        db_session.global_init("db/messenger.db")
         db_sess = db_session.create_session()
         contact = db_sess.query(User).get(chat.contact)
         self.id = chat.id
@@ -26,3 +25,5 @@ class ContactCard:
             self.last_message = forward[-1].text
         else:
             self.last_message = ""
+
+        db_sess.close()
