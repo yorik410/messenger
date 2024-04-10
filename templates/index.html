@@ -24,7 +24,16 @@
                                     </tr>
                                     <tr>
                                         <td>
-                                            <span class="p-1" style="margin-left: 15px; font-size: 14px;">{{ user.last_message }}</span>
+                                            <div class="p-1" style="margin-left: 15px; font-size: 14px;"
+                                                  id="last_mess">{{ user.last_message }}</div>
+                                            <style>
+                                                #last_mess {
+                                                  white-space: nowrap;
+                                                  width: 20vw;
+                                                  overflow: hidden;
+                                                  text-overflow: ellipsis;
+                                                }
+                                            </style>
                                         </td>
                                     </tr>
                                 </table>
@@ -34,7 +43,7 @@
                 </div>
             </td>
             <td>
-                <div class="messages rounded-3 border border-dark border-5 bg-secondary" style="margin-left: 10px">
+                <div class="messages rounded-3 border border-dark border-5 bg-secondary" style="margin-left: 10px" id="autoscroll">
                     {% block chat %}Please, select a chat{% endblock %}
                 </div>
             </td>

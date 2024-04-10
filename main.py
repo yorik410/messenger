@@ -124,6 +124,8 @@ def chat(id:int):
     reverse = db_sess.query(Chat).filter(Chat.user_id == chat.contact, Chat.contact == chat.user_id).first()
     reverse = reverse.messages if reverse else []
     messages = list(sorted(forward + reverse, key=lambda x: x.date_time))
+    for i in messages:
+        i.text = i.text.replace("\r\n", "<br>")
     form = SendMessageForm()
     if form.validate_on_submit():
         message_text = form.text.data.strip()

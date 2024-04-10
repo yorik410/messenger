@@ -3,12 +3,19 @@
 
     {% for mess in messages %}
         {% if mess.chat.user_id == user_id %}
-            <p class="bg-primary p-2 rounded-pill">{{ mess.text }}</p>
+            <p class="bg-primary p-2 rounded-3" style="max-width: 68vw; word-break: break-word;
+                   white-space: pre-wrap;
+                   -moz-white-space: pre-wrap;">{{ mess.text }}</p>
         {% else %}
-            <p class="bg-dark p-2 rounded-pill">{{ mess.text }}</p>
+            <p class="bg-dark p-2 rounded-3" style="max-width: 68vw; word-break: break-word;
+                   white-space: pre-wrap;
+                   -moz-white-space: pre-wrap;">{{ mess.text }}</p>
         {% endif %}
     {% endfor %}
-
+    <div id="bottom"></div>
+    <script>
+        document.getElementById('bottom').scrollIntoView(true);
+    </script>
 {% endblock %}
 
 {% block message %}
@@ -17,10 +24,10 @@
         <table style="width: 100%;">
             <tr>
                 <td class="p-1">
-                    {{ form.text(class="form-control form-control-sm", style="resize:none; height:7vh;", placeholder="Write a message...") }}
+                    {{ form.text(class="form-control form-control-sm", style="resize:none; height:7vh;", placeholder="Write a message...", autofocus=True) }}
                 </td>
                 <td class="p-1">
-                    {{ form.submit(type="submit", class="btn btn-primary", autofocus=True) }}
+                    {{ form.submit(type="submit", class="btn btn-primary") }}
                 </td>
             </tr>
         </table>
