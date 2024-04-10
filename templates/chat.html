@@ -12,18 +12,27 @@
 {% endblock %}
 
 {% block message %}
-    <form action="" method="post" id="message_form">
+    <form action="" method="post" id="f1">
         {{ form.hidden_tag() }}
         <table style="width: 100%;">
             <tr>
                 <td class="p-1">
-                    {{ form.text(class="form-control form-control-sm", style="resize:none; height:7vh;", placeholder="Write a message...",
-                    onkeypress="if(event.shiftKey && event.keyCode==13) {/* действия для  SHIFT+Enter */} else if(!event.shiftKey && event.keyCode==13) {(this).closest('form').submit();}") }}
+                    {{ form.text(class="form-control form-control-sm", style="resize:none; height:7vh;", placeholder="Write a message...") }}
                 </td>
                 <td class="p-1">
                     {{ form.submit(type="submit", class="btn btn-primary", autofocus=True) }}
                 </td>
             </tr>
         </table>
+        <script>
+            const form = document.querySelector('form');
+
+            form.addEventListener('keypress', (event) => {
+              if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                HTMLFormElement.prototype.submit.call(form);
+              }
+            });
+        </script>
     </form>
 {% endblock %}
