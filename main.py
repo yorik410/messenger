@@ -6,6 +6,7 @@ from db_scripts import db_session
 from db_scripts.data.users import User
 from db_scripts.data.chats import Chat
 from db_scripts.data.messages import Message
+from db_scripts.data.notifications import Notification
 
 from db_scripts.forms.login_form import LoginForm, RegisterForm
 from db_scripts.forms.add_chat import AddChatForm
@@ -16,7 +17,6 @@ from scripts.cards import ContactCard
 import os
 import sys
 import datetime
-from pynput import keyboard
 
 
 static_path = os.path.join("\\".join(sys.argv[0].split("\\")[:-1]), "src")
@@ -103,7 +103,6 @@ def register():
 @app.route("/chats")
 def index():
     db_sess = db_session.create_session()
-    # print(current_user.id)
     if current_user.is_authenticated:
         contacts = list(map(lambda x: ContactCard(x), db_sess.query(Chat).filter(Chat.user_id == current_user.id).all()))
     else:
@@ -117,32 +116,37 @@ def chat(id:int):
     db_sess = db_session.create_session()
     if current_user.is_authenticated:
         contacts = list(map(lambda x: ContactCard(x), db_sess.query(Chat).filter(Chat.user_id == current_user.id).all()))
+        chat = db_sess.query(Chat).get(id)
+        forward = chat.messages if chat else []
+        reverse = db_sess.query(Chat).filter(Chat.user_id == chat.contact,
+                                             Chat.contact == chat.user_id).first()
+        reverse = reverse.messages if reverse else []
+        messages = list(sorted(forward + reverse, key=lambda x: x.date_time))
+
+        notifications = db_sess.query(Notification).filter(Notification.user_id == current_user.id).all()
+
+        form = SendMessageForm()
+        if form.validate_on_submit():
+            message_text = form.text.data.strip()
+            if not message_text:
+                db_sess.close()
+                return render_template('chat.html', id=id, title="Chats",
+                                       contacts=contacts, messages=messages,
+                                       user_id=current_user.id, form=form)
+            mess = Message()
+            mess.chat_id = id
+            mess.text = message_text
+            mess.date_time = datetime.datetime.now()
+            db_sess.add(mess)
+            db_sess.commit()
+            db_sess.close()
+            return redirect(f"/chats/{id}")
+        return render_template('chat.html', id=id, title="Chats",
+                               contacts=contacts, messages=messages,
+                               user_id=current_user.id, form=form)
     else:
         contacts = []
-    chat = db_sess.query(Chat).get(id)
-    forward = chat.messages if chat else []
-    reverse = db_sess.query(Chat).filter(Chat.user_id == chat.contact, Chat.contact == chat.user_id).first()
-    reverse = reverse.messages if reverse else []
-    messages = list(sorted(forward + reverse, key=lambda x: x.date_time))
-    for i in messages:
-        i.text = i.text.replace("\r\n", "<br>")
-    form = SendMessageForm()
-    if form.validate_on_submit():
-        message_text = form.text.data.strip()
-        if not message_text:
-            db_sess.close()
-            return render_template('chat.html', id=id, title="Chats", contacts=contacts, messages=messages,
-                                   user_id=current_user.id, form=form)
-        mess = Message()
-        mess.chat_id = id
-        mess.text = message_text
-        mess.date_time = datetime.datetime.now()
-        db_sess.add(mess)
-        db_sess.commit()
-        db_sess.close()
-        return redirect(f"/chats/{id}")
-    return render_template('chat.html', id=id, title="Chats", contacts=contacts, messages=messages,
-                           user_id=current_user.id, form=form)
+    return render_template("index.html", title="Chats", contacts=contacts)
 
 
 @app.route("/add_chat", methods=['GET', 'POST'])

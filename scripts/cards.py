@@ -2,6 +2,7 @@ from db_scripts.data.chats import Chat
 from db_scripts.data.messages import Message
 from db_scripts.data.users import User
 from db_scripts import db_session
+import datetime
 
 
 class ContactCard:
@@ -27,3 +28,10 @@ class ContactCard:
             self.last_message = ""
 
         db_sess.close()
+
+
+class NoticeCard:
+    def __init__(self, notification):
+        self.text = notification.text
+        self.date_time = notification.date_time
+        self.showed_date_time = datetime.datetime
