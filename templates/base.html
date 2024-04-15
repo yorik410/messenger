@@ -43,11 +43,43 @@
     </nav>
     <body class="bg-secondary">
         <main role="main" class="p-2 text-white">
-            <dialog class="dialog bg-secondary text-white border border-dark border-5 rounded-3" id="modal-example" onclick="closeOnBackDropClick(event)" aria-labelledby="dialog-name">
+            <dialog class="dialog bg-secondary text-white border border-dark border-5 rounded-3"
+                    id="modal-example" onclick="closeOnBackDropClick(event)" aria-labelledby="dialog-name" style="width: 50vw; height:56vh;">
                 <form class="dialog__wrapper" method="dialog">
-                  <h2 class="dialog__title" id="dialog-name">Notifications</h2>
+                    <h2 class="dialog__title" id="dialog-name">Notifications</h2>
+                    <div class="border border-5 border-dark rounded-3 scroll_notifications">
+                        {% for n in notifications %}
+                            <div class="bg-dark rounded-3 p-2">
+                                <table>
+                                    <tr>
+                                        <td class="p-1">
+                                            <span>{{ n.text }}</span>
+                                        </td>
+                                        <td class="p-1 text-muted">
+                                            <span>{{ n.showed_date_time }}</span>
+                                        </td>
+                                    </tr>
+                                </table>
+                                <form>
+                                    {% for button in n.buttons %}
+                                    
+                                    {% endfor %}
+                                </form>
+                            </div>
+                        {% endfor %}
+                    </div><br>
+                    <button class="btn btn-success" type="submit">Close</button>
 
-                  <button class="btn btn-success">Close</button>
+                    <style>
+                        div.scroll_notifications {
+                            margin:4px, 4px;
+                            padding:4px;
+                            height: 40vh;
+                            overflow-x: hidden;
+                            overflow-y: auto;
+                            text-align:justify;
+                        }
+                    </style>
                 </form>
             </dialog>
             <br>

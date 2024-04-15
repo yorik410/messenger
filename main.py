@@ -11,8 +11,9 @@ from db_scripts.data.notifications import Notification
 from db_scripts.forms.login_form import LoginForm, RegisterForm
 from db_scripts.forms.add_chat import AddChatForm
 from db_scripts.forms.send_message import SendMessageForm
+from db_scripts.forms.notifications_form import NotificationsForm
 
-from scripts.cards import ContactCard
+from scripts.cards import ContactCard, NoticeCard
 
 import os
 import sys
@@ -105,10 +106,12 @@ def index():
     db_sess = db_session.create_session()
     if current_user.is_authenticated:
         contacts = list(map(lambda x: ContactCard(x), db_sess.query(Chat).filter(Chat.user_id == current_user.id).all()))
+        notifications = list(map(lambda x: NoticeCard(x), db_sess.query(Notification).filter(Notification.user_id == current_user.id).all()))
     else:
         contacts = []
+        notifications = []
     db_sess.close()
-    return render_template("index.html", title="Chats", contacts=contacts)
+    return render_template("index.html", title="Chats", contacts=contacts, notifications=notifications)
 
 
 @app.route("/chats/<int:id>", methods=['GET', 'POST'])
@@ -123,7 +126,7 @@ def chat(id:int):
         reverse = reverse.messages if reverse else []
         messages = list(sorted(forward + reverse, key=lambda x: x.date_time))
 
-        notifications = db_sess.query(Notification).filter(Notification.user_id == current_user.id).all()
+        notifications = list(map(lambda x: NoticeCard(x), db_sess.query(Notification).filter(Notification.user_id == current_user.id).all()))
 
         form = SendMessageForm()
         if form.validate_on_submit():
@@ -131,7 +134,7 @@ def chat(id:int):
             if not message_text:
                 db_sess.close()
                 return render_template('chat.html', id=id, title="Chats",
-                                       contacts=contacts, messages=messages,
+                                       contacts=contacts, messages=messages, notifications=notifications,
                                        user_id=current_user.id, form=form)
             mess = Message()
             mess.chat_id = id
@@ -142,11 +145,12 @@ def chat(id:int):
             db_sess.close()
             return redirect(f"/chats/{id}")
         return render_template('chat.html', id=id, title="Chats",
-                               contacts=contacts, messages=messages,
+                               contacts=contacts, messages=messages, notifications=notifications,
                                user_id=current_user.id, form=form)
     else:
         contacts = []
-    return render_template("index.html", title="Chats", contacts=contacts)
+        notifications = []
+    return render_template("index.html", title="Chats", contacts=contacts, notifications=notifications)
 
 
 @app.route("/add_chat", methods=['GET', 'POST'])
@@ -185,6 +189,14 @@ def add_chat():
             contact=user.id
         )
         db_sess.add(chat)
+
+        notification = Notification(
+            user_id=user.id,
+            text=f"You have been invited to chat with {db_sess.query(User).get(current_user.id).nickname}",
+            type="Suggestion",
+            buttons="accept;reject"
+        )
+        db_sess.add(notification)
         db_sess.commit()
         db_sess.close()
         return redirect("/")

@@ -34,4 +34,5 @@ class NoticeCard:
     def __init__(self, notification):
         self.text = notification.text
         self.date_time = notification.date_time
-        self.showed_date_time = datetime.datetime
+        self.showed_date_time = f"{notification.date_time.date()} {notification.date_time.hour}:{notification.date_time.minute}"
+        self.buttons = notification.buttons.split(";")
