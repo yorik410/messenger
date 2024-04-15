@@ -1,6 +1,6 @@
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from flask import Flask, jsonify, make_response
-from flask import render_template, redirect
+from flask import render_template, redirect, request
 from db_scripts import db_session
 
 from db_scripts.data.users import User
@@ -11,7 +11,6 @@ from db_scripts.data.notifications import Notification
 from db_scripts.forms.login_form import LoginForm, RegisterForm
 from db_scripts.forms.add_chat import AddChatForm
 from db_scripts.forms.send_message import SendMessageForm
-from db_scripts.forms.notifications_form import NotificationsForm
 
 from scripts.cards import ContactCard, NoticeCard
 
@@ -103,6 +102,7 @@ def register():
 @app.route("/")
 @app.route("/chats")
 def index():
+    visible_notif = request.args.get("visible_notif", type=bool, default=False)
     db_sess = db_session.create_session()
     if current_user.is_authenticated:
         contacts = list(map(lambda x: ContactCard(x), db_sess.query(Chat).filter(Chat.user_id == current_user.id).all()))
@@ -111,11 +111,12 @@ def index():
         contacts = []
         notifications = []
     db_sess.close()
-    return render_template("index.html", title="Chats", contacts=contacts, notifications=notifications)
+    return render_template("index.html", title="Chats", contacts=contacts, notifications=notifications, notifications_default_visible=visible_notif)
 
 
 @app.route("/chats/<int:id>", methods=['GET', 'POST'])
 def chat(id:int):
+    visible_notif = request.args.get("visible_notif", type=bool, default=False)
     db_sess = db_session.create_session()
     if current_user.is_authenticated:
         contacts = list(map(lambda x: ContactCard(x), db_sess.query(Chat).filter(Chat.user_id == current_user.id).all()))
@@ -134,8 +135,8 @@ def chat(id:int):
             if not message_text:
                 db_sess.close()
                 return render_template('chat.html', id=id, title="Chats",
-                                       contacts=contacts, messages=messages, notifications=notifications,
-                                       user_id=current_user.id, form=form)
+                                       contacts=contacts, messages=messages, notifications=notifications, chat_id=id,
+                                       user_id=current_user.id, form=form, notifications_default_visible=visible_notif)
             mess = Message()
             mess.chat_id = id
             mess.text = message_text
@@ -145,8 +146,8 @@ def chat(id:int):
             db_sess.close()
             return redirect(f"/chats/{id}")
         return render_template('chat.html', id=id, title="Chats",
-                               contacts=contacts, messages=messages, notifications=notifications,
-                               user_id=current_user.id, form=form)
+                               contacts=contacts, messages=messages, notifications=notifications, chat_id=id,
+                               user_id=current_user.id, form=form, notifications_default_visible=visible_notif)
     else:
         contacts = []
         notifications = []
@@ -202,6 +203,42 @@ def add_chat():
         return redirect("/")
 
     return render_template("add_chat.html", title="Add chat", form=form)
+
+
+@app.route("/notif_sub_ok/<int:id>", methods=["POST", "GET"])
+def notification_submit_ok(id):
+    chat_id = request.args.get("chat", type=int, default=-1)
+    db_sess = db_session.create_session()
+    if current_user.id == db_sess.query(Notification).get(id).user_id:
+        db_sess.query(Notification).filter(Notification.id == id).delete()
+        db_sess.commit()
+    url = "/?visible_notif=true" if chat_id == -1 else f"/chats/{chat_id}?visible_notif=true"
+    return redirect(url)
+
+
+@app.route("/notif_sub_ac/<int:id>", methods=["POST", "GET"])
+def notification_submit_ac(id):
+    chat_id = request.args.get("chat", type=int, default=-1)
+    db_sess = db_session.create_session()
+    if current_user.id == db_sess.query(Notification).get(id).user_id:
+        chat = Chat(
+
+        )
+        db_sess.query(Notification).filter(Notification.id == id).delete()
+        db_sess.commit()
+    url = "/?visible_notif=true" if chat_id == -1 else f"/chats/{chat_id}?visible_notif=true"
+    return redirect(url)
+
+
+@app.route("/notif_sub_rj/<int:id>", methods=["POST", "GET"])
+def notification_submit_rj(id):
+    chat_id = request.args.get("chat", type=int, default=-1)
+    db_sess = db_session.create_session()
+    if current_user.id == db_sess.query(Notification).get(id).user_id:
+        db_sess.query(Notification).filter(Notification.id == id).delete()
+        db_sess.commit()
+    url = "/?visible_notif=true" if chat_id == -1 else f"/chats/{chat_id}?visible_notif=true"
+    return redirect(url)
 
 
 @app.route('/logout')

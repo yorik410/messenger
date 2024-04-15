@@ -19,6 +19,12 @@
                 dialogElement.close()
               }
             }
+            function showNotifications(){
+                document.getElementById("modal-example").showModal();
+            }
+            function closeNotifications(){
+                document.getElementById("modal-example").close();
+            }
         </script>
 
         {% block head %}{% endblock %}
@@ -62,13 +68,31 @@
                                 </table>
                                 <form>
                                     {% for button in n.buttons %}
-                                    
+                                        {% if button == "ok" %}
+                                            {% if chat_id %}
+                                                <a class="btn btn-primary p-1" href="/notif_sub_ok/{{ n.id }}?chat={{ chat_id }}">Ok</a>
+                                            {% else %}
+                                                <a class="btn btn-primary p-1" href="/notif_sub_ok/{{ n.id }}">Ok</a>
+                                            {% endif %}
+                                        {% elif button == "accept" %}
+                                            {% if chat_id %}
+                                                <a class="btn btn-success p-1" href="/notif_sub_ac/{{ n.id }}?chat={{ chat_id }}">Accept</a>
+                                            {% else %}
+                                                <a class="btn btn-success p-1" href="/notif_sub_ac/{{ n.id }}">Accept</a>
+                                            {% endif %}
+                                        {% elif button == "reject" %}
+                                            {% if chat_id %}
+                                                <a class="btn btn-danger p-1" href="/notif_sub_rj/{{ n.id }}?chat={{ chat_id }}">Reject</a>
+                                            {% else %}
+                                                <a class="btn btn-danger p-1" href="/notif_sub_rj/{{ n.id }}">Reject</a>
+                                            {% endif %}
+                                        {% endif %}
                                     {% endfor %}
                                 </form>
                             </div>
                         {% endfor %}
                     </div><br>
-                    <button class="btn btn-success" type="submit">Close</button>
+                    <button class="btn btn-success" type="submit" onclick="closeNotifications();">Close</button>
 
                     <style>
                         div.scroll_notifications {
@@ -82,6 +106,9 @@
                     </style>
                 </form>
             </dialog>
+            {% if notifications_default_visible %}
+                <script>showNotifications();</script>
+            {% endif %}
             <br>
             <div>{% block content %}{% endblock %}</div>
         </main>
