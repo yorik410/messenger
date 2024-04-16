@@ -14,6 +14,7 @@ class Notification(SqlAlchemyBase, SerializerMixin):
     text = sqlalchemy.Column(sqlalchemy.String, nullable=False)
     type = sqlalchemy.Column(sqlalchemy.String, nullable=False)
     buttons = sqlalchemy.Column(sqlalchemy.String, nullable=True)
+    sender_id = sqlalchemy.Column(sqlalchemy.Integer, nullable=True)
     date_time = sqlalchemy.Column(sqlalchemy.DateTime, default=datetime.datetime.now())
 
     user = orm.relationship('User')

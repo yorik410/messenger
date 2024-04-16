@@ -49,13 +49,13 @@
     </nav>
     <body class="bg-secondary">
         <main role="main" class="p-2 text-white">
-            <dialog class="dialog bg-secondary text-white border border-dark border-5 rounded-3"
-                    id="modal-example" onclick="closeOnBackDropClick(event)" aria-labelledby="dialog-name" style="width: 50vw; height:56vh;">
+            <dialog class="dialog bg-dark text-white border border-dark border-5 rounded-3"
+                    id="modal-example" onclick="closeOnBackDropClick(event)" aria-labelledby="dialog-name" style="width: 50vw; ">
                 <form class="dialog__wrapper" method="dialog">
                     <h2 class="dialog__title" id="dialog-name">Notifications</h2>
-                    <div class="border border-5 border-dark rounded-3 scroll_notifications">
+                    <div class="border border-3 border-secondary rounded-3 scroll_notifications">
                         {% for n in notifications %}
-                            <div class="bg-dark rounded-3 p-2">
+                            <div class="bg-dark rounded-3 p-2 border border-secondary border-3 m-2">
                                 <table>
                                     <tr>
                                         <td class="p-1">

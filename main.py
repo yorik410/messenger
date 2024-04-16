@@ -194,8 +194,9 @@ def add_chat():
         notification = Notification(
             user_id=user.id,
             text=f"You have been invited to chat with {db_sess.query(User).get(current_user.id).nickname}",
-            type="Suggestion",
-            buttons="accept;reject"
+            type="Invitation",
+            buttons="accept;reject",
+            sender_id=current_user.id
         )
         db_sess.add(notification)
         db_sess.commit()
@@ -220,10 +221,21 @@ def notification_submit_ok(id):
 def notification_submit_ac(id):
     chat_id = request.args.get("chat", type=int, default=-1)
     db_sess = db_session.create_session()
-    if current_user.id == db_sess.query(Notification).get(id).user_id:
+    notif = db_sess.query(Notification).get(id)
+    if current_user.id == notif.user_id:
         chat = Chat(
-
+            user_id=current_user.id,
+            contact=notif.sender_id
         )
+        db_sess.add(chat)
+        notification = Notification(
+            user_id=notif.sender_id,
+            text=f"{current_user.nickname} accepted your invitation",
+            type="Notification",
+            buttons="ok",
+            sender_id=current_user.id
+        )
+        db_sess.add(notification)
         db_sess.query(Notification).filter(Notification.id == id).delete()
         db_sess.commit()
     url = "/?visible_notif=true" if chat_id == -1 else f"/chats/{chat_id}?visible_notif=true"
@@ -234,7 +246,17 @@ def notification_submit_ac(id):
 def notification_submit_rj(id):
     chat_id = request.args.get("chat", type=int, default=-1)
     db_sess = db_session.create_session()
-    if current_user.id == db_sess.query(Notification).get(id).user_id:
+    notif = db_sess.query(Notification).get(id)
+    if current_user.id == notif.user_id:
+        db_sess.query(Chat).filter(Chat.user_id == notif.sender_id, Chat.contact == current_user.id).delete()
+        notification = Notification(
+            user_id=notif.sender_id,
+            text=f"{current_user.nickname} rejected your invitation",
+            type="Notification",
+            buttons="ok",
+            sender_id=current_user.id
+        )
+        db_sess.add(notification)
         db_sess.query(Notification).filter(Notification.id == id).delete()
         db_sess.commit()
     url = "/?visible_notif=true" if chat_id == -1 else f"/chats/{chat_id}?visible_notif=true"
