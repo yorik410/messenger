@@ -72,6 +72,14 @@ def register():
             return render_template('register.html', title='Register',
                                    form=form,
                                    message='Don\'t use "@" in nickname')
+        if len(form.nickname.data) < 5:
+            return render_template('register.html', title='Register',
+                                   form=form,
+                                   message="Nickname length should be more than 4 characters")
+        if len(form.nickname.data) > 15:
+            return render_template('register.html', title='Register',
+                                   form=form,
+                                   message="Nickname length should be less than 16 characters")
         db_sess = db_session.create_session()
         if db_sess.query(User).filter(User.email == form.email.data).first():
             db_sess.close()
@@ -102,7 +110,7 @@ def register():
 @app.route("/")
 @app.route("/chats")
 def index():
-    visible_notif = request.args.get("visible_notif", type=bool, default=False)
+    visible_notif = all((request.args.get("visible_notif", type=bool, default=False), current_user.is_authenticated))
     db_sess = db_session.create_session()
     if current_user.is_authenticated:
         contacts = list(map(lambda x: ContactCard(x), db_sess.query(Chat).filter(Chat.user_id == current_user.id).all()))
@@ -116,9 +124,11 @@ def index():
 
 @app.route("/chats/<int:id>", methods=['GET', 'POST'])
 def chat(id:int):
-    visible_notif = request.args.get("visible_notif", type=bool, default=False)
+    visible_notif = all((request.args.get("visible_notif", type=bool, default=False), current_user.is_authenticated))
     db_sess = db_session.create_session()
     if current_user.is_authenticated:
+        if db_sess.query(Chat).get(id).user_id != current_user.id:
+            return redirect("/")
         contacts = list(map(lambda x: ContactCard(x), db_sess.query(Chat).filter(Chat.user_id == current_user.id).all()))
         chat = db_sess.query(Chat).get(id)
         forward = chat.messages if chat else []
@@ -210,7 +220,7 @@ def add_chat():
 def notification_submit_ok(id):
     chat_id = request.args.get("chat", type=int, default=-1)
     db_sess = db_session.create_session()
-    if current_user.id == db_sess.query(Notification).get(id).user_id:
+    if current_user.is_authenticated and current_user.id == db_sess.query(Notification).get(id).user_id:
         db_sess.query(Notification).filter(Notification.id == id).delete()
         db_sess.commit()
     url = "/?visible_notif=true" if chat_id == -1 else f"/chats/{chat_id}?visible_notif=true"
@@ -222,7 +232,7 @@ def notification_submit_ac(id):
     chat_id = request.args.get("chat", type=int, default=-1)
     db_sess = db_session.create_session()
     notif = db_sess.query(Notification).get(id)
-    if current_user.id == notif.user_id:
+    if current_user.is_authenticated and current_user.id == notif.user_id:
         chat = Chat(
             user_id=current_user.id,
             contact=notif.sender_id
@@ -247,7 +257,7 @@ def notification_submit_rj(id):
     chat_id = request.args.get("chat", type=int, default=-1)
     db_sess = db_session.create_session()
     notif = db_sess.query(Notification).get(id)
-    if current_user.id == notif.user_id:
+    if current_user.is_authenticated and current_user.id == notif.user_id:
         db_sess.query(Chat).filter(Chat.user_id == notif.sender_id, Chat.contact == current_user.id).delete()
         notification = Notification(
             user_id=notif.sender_id,
