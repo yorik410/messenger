@@ -280,6 +280,15 @@ def logout():
     return redirect("/")
 
 
+@app.route("/update_from_github")
+def update():
+    with open("notif.txt", "w") as file:
+        file.write("r")
+        file.close()
+    os.kill(os.getpid(), signal.SIGINT)
+    return redirect("/")
+
+
 if __name__ == '__main__':
     db_session.global_init("db/messenger.db")
     # app.run(port=8080, host='127.0.0.1')
