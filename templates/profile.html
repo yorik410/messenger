@@ -53,13 +53,13 @@
             </p>
             <p>{{ message }}</p>
             {% if edit %}
-                <p><a href="/edit_password" class="btn btn-primary">Edit password</a></p>
-                <p>{{ form.submit(type="submit", class="btn btn-success") }}</p>
-            {% else %}
                 <p>
                     <span>{{ form.submit(type="submit", class="btn btn-success") }}</span>
                     <span><a href="/profile" class="btn btn-danger m-2">Cancel</a></span>
                 </p>
+            {% else %}
+                <p><a href="/change_password" class="btn btn-warning">Edit password</a></p>
+                <p><a href="/profile?edit=true" class="btn btn-primary">Edit profile</a></p>
             {% endif %}
         </form>
     </div>
