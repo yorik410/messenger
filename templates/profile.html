@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="bg-dark p-3 rounded-3" style="width: 50vw; transform: translate(50%, 0);">
+        {% if edit %}<h1>Edit profile</h1>{% else %}<h1>Your profile</h1>{% endif %}
+        <form action="" method="post">
+            {{ form.hidden_tag() }}
+
+            <p>
+                {{ form.email.label }}<br>
+                {{ form.email(class="form-control", type="email", disabled=True, readonly=True) }}<br>
+                {% for error in form.email.errors %}
+                    <p class="alert alert-danger" role="alert">
+                        {{ error }}
+                    </p>
+                {% endfor %}
+            </p>
+            <p>
+                {{ form.nickname.label }}<br>
+                {{ form.nickname(class="form-control", disabled=not edit, readonly=not edit) }}<br>
+                {% for error in form.nickname.errors %}
+                    <p class="alert alert-danger" role="alert">
+                        {{ error }}
+                    </p>
+                {% endfor %}
+            </p>
+            <p>
+                {{ form.name.label }}<br>
+                {{ form.name(class="form-control", disabled=not edit, readonly=not edit) }}<br>
+                {% for error in form.name.errors %}
+                    <p class="alert alert-danger" role="alert">
+                        {{ error }}
+                    </p>
+                {% endfor %}
+            </p>
+            <p>
+                {{ form.surname.label }}<br>
+                {{ form.surname(class="form-control", disabled=not edit, readonly=not edit) }}<br>
+                {% for error in form.surname.errors %}
+                    <p class="alert alert-danger" role="alert">
+                        {{ error }}
+                    </p>
+                {% endfor %}
+            </p>
+            <p>
+                {{ form.age.label }}<br>
+                {{ form.age(class="form-control", disabled=not edit, readonly=not edit) }}<br>
+                {% for error in form.age.errors %}
+                    <p class="alert alert-danger" role="alert">
+                        {{ error }}
+                    </p>
+                {% endfor %}
+            </p>
+            <p>{{ message }}</p>
+            {% if edit %}
+                <p><a href="/edit_password" class="btn btn-primary">Edit password</a></p>
+                <p>{{ form.submit(type="submit", class="btn btn-success") }}</p>
+            {% else %}
+                <p><a href="/profile?edit=true" class="btn btn-primary">Edit profile</a></p>
+            {% endif %}
+        </form>
+    </div>
+{% endblock %}

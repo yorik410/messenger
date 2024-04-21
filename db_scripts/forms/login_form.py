@@ -36,3 +36,13 @@ class RegisterForm(FlaskForm):
 
     def check_password(self, password):  # Вроде не нужно
         return check_password_hash(self.hashed_password, password)
+
+
+class EditProfileForm(FlaskForm):
+    email = EmailField('Email', validators=[DataRequired()])
+    nickname = StringField('Nickname', validators=[DataRequired()])
+    surname = StringField('Surname (optional)')
+    name = StringField('Name', validators=[DataRequired()])
+    age = IntegerField("Age", validators=[DataRequired()])
+
+    submit = SubmitField('Submit edit')

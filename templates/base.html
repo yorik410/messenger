@@ -36,8 +36,10 @@
                 <button class="btn btn-success opener p-2" type="button" aria-controls="modal-example" onclick="window['modal-example'].showModal()" style="margin-right: 10px;">
                     <img src="{{ url_for('static', filename='img/notification-bell.png') }}" width="20" height="20" alt="">
                 </button>
-                <img src="{{ url_for('static', filename='img/user-profile-icon.png') }}" width="40" height="40" alt="">
-                <span class="text-white p-3" id="name_label">{% if current_user.surname %}{{ current_user.surname }}{% endif %} {{ current_user.name }}</span>
+                <a href="/profile" style="text-decoration: none;">
+                    <img src="{{ url_for('static', filename='img/user-profile-icon.png') }}" width="40" height="40" alt="">
+                    <span class="text-white p-3" id="name_label">{% if current_user.surname %}{{ current_user.surname }}{% endif %} {{ current_user.name }}</span>
+                </a>
                 <style>
                     #name_label {
                       white-space: nowrap;

@@ -8,7 +8,7 @@ from db_scripts.data.chats import Chat
 from db_scripts.data.messages import Message
 from db_scripts.data.notifications import Notification
 
-from db_scripts.forms.login_form import LoginForm, RegisterForm
+from db_scripts.forms.login_form import LoginForm, RegisterForm, EditProfileForm
 from db_scripts.forms.add_chat import AddChatForm
 from db_scripts.forms.send_message import SendMessageForm
 
@@ -271,6 +271,56 @@ def notification_submit_rj(id):
         db_sess.commit()
     url = "/?visible_notif=true" if chat_id == -1 else f"/chats/{chat_id}?visible_notif=true"
     return redirect(url)
+
+
+@app.route("/profile", methods=["GET", "POST"])
+def profile():
+    edit = request.args.get("edit", type=bool, default=False)
+    if current_user.is_authenticated:
+        db_sess = db_session.create_session()
+        form = EditProfileForm()
+        form.email.data = current_user.email
+        if form.validate_on_submit():
+            temp = ["email", "nickname", "name", "surname", "age"]
+            for i in temp:
+                if (eval(f"form.{i}.data") != eval(f"current_user.{i}") and not (eval(f"current_user.{i}") is None
+                                                                                 and not eval(f"form.{i}.data"))):
+                    break
+            else:
+                return redirect("/profile")
+
+            if "@" in form.nickname.data:
+                return render_template("profile.html", title="Profile", edit=edit, form=form,
+                                       message='Don\'t use "@" in nickname')
+
+            if len(form.nickname.data) < 5:
+                return render_template("profile.html", title="Profile", edit=edit, form=form,
+                                       message="Nickname length should be more than 4 characters")
+
+            if len(form.nickname.data) > 15:
+                return render_template("profile.html", title="Profile", edit=edit, form=form,
+                                       message="Nickname length should be less than 16 characters")
+
+            if db_sess.query(User).filter(User.nickname == form.nickname.data, User.id != current_user.id).first():
+                db_sess.close()
+                return render_template("profile.html", title="Profile", edit=edit, form=form,
+                                       message="User with this nickname already exists")
+
+            user = db_sess.query(User).get(current_user.id)
+            user.nickname = form.nickname.data
+            user.name = form.name.data
+            user.surname = form.surname.data if form.surname.data else None
+            user.age = form.age.data
+            user.modified_date = datetime.datetime.now()
+            db_sess.commit()
+            return redirect("/profile")
+        else:
+            form.nickname.data = current_user.nickname
+            form.name.data = current_user.name
+            form.surname.data = current_user.surname if current_user.surname else ""
+            form.age.data = current_user.age
+        return render_template("profile.html", title="Profile", edit=edit, form=form)
+    return redirect("/")
 
 
 @app.route('/logout')
