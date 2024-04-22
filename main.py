@@ -10,6 +10,7 @@ from db_scripts.data.notifications import Notification
 
 from db_scripts.forms.login_form import LoginForm, RegisterForm, EditProfileForm
 from db_scripts.forms.add_chat import AddChatForm
+from db_scripts.forms.change_password import ChangePasswordForm
 from db_scripts.forms.send_message import SendMessageForm
 
 from scripts.cards import ContactCard, NoticeCard
@@ -321,6 +322,32 @@ def profile():
             form.surname.data = current_user.surname if current_user.surname else ""
             form.age.data = current_user.age
         return render_template("profile.html", title="Profile", edit=edit, form=form)
+    return redirect("/")
+
+
+@app.route("/change_password", methods=["GET", "POST"])
+def change_password():
+    if current_user.is_authenticated:
+        form = ChangePasswordForm()
+        if form.validate_on_submit():
+            if not current_user.check_password(form.old_password.data):
+                return render_template("change_password.html", title="Change password", form=form,
+                                       message="Wrong previous password")
+            if form.new_password.data != form.new_password_again.data:
+                return render_template("change_password.html", title="Change password", form=form,
+                                       message="Passwords don't match")
+            if len(form.new_password.data) < 8:
+                return render_template("change_password.html", title="Change password", form=form,
+                                       message="Password length should be more than 7 characters")
+            if form.new_password.data == form.old_password.data:
+                return render_template("change_password.html", title="Change password", form=form,
+                                       message="Your new password matches with previous one")
+            db_sess = db_session.create_session()
+            user = db_sess.query(User).get(current_user.id)
+            user.set_password(form.get_hashed_password())
+            db_sess.commit()
+            return redirect("/profile")
+        return render_template("change_password.html", title="Change password", form=form)
     return redirect("/")
 
 
