@@ -17,6 +17,7 @@ from scripts.cards import ContactCard, NoticeCard
 import os
 import sys
 import datetime
+import signal
 
 
 static_path = os.path.join("\\".join(sys.argv[0].split("\\")[:-1]), "src")
@@ -332,10 +333,11 @@ def logout():
 
 @app.route("/update_from_github")
 def update():
-    with open("notif.txt", "w") as file:
-        file.write("r")
-        file.close()
-    os.kill(os.getpid(), signal.SIGINT)
+    if current_user.id == 1:
+        with open("notif.txt", "w") as file:
+            file.write("r")
+            file.close()
+        os.kill(os.getpid(), signal.SIGINT)
     return redirect("/")
 
 
