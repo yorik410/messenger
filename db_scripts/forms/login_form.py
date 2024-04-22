@@ -1,5 +1,6 @@
 from flask_wtf import FlaskForm
-from wtforms import PasswordField, BooleanField, SubmitField, EmailField, StringField, IntegerField, DateField, TextAreaField
+from wtforms import PasswordField, BooleanField, SubmitField, EmailField, StringField, IntegerField, DateField, \
+    TextAreaField
 from wtforms.validators import DataRequired
 from werkzeug.security import check_password_hash, generate_password_hash
 
@@ -9,6 +10,7 @@ class LoginForm(FlaskForm):
     password = PasswordField('Password', validators=[DataRequired()])
     remember_me = BooleanField('Remember me')
     submit = SubmitField('Log in')
+    hashed_password = ""
 
     def set_password(self, password):  # Вроде не нужно
         self.hashed_password = generate_password_hash(password)
@@ -27,6 +29,8 @@ class RegisterForm(FlaskForm):
     password_again = PasswordField('Repeat password',
                                    validators=[DataRequired()])
     submit = SubmitField('Register')
+
+    hashed_password = ""
 
     def set_password(self, password):  # Вроде не нужно
         self.hashed_password = generate_password_hash(password)

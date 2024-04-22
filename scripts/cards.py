@@ -35,5 +35,6 @@ class NoticeCard:
         self.id = notification.id
         self.text = notification.text
         self.date_time = notification.date_time
-        self.showed_date_time = f"{notification.date_time.date()} {notification.date_time.hour}:{notification.date_time.minute}"
+        self.showed_date_time = \
+            f"{notification.date_time.date()} {notification.date_time.hour}:{notification.date_time.minute}"
         self.buttons = notification.buttons.split(";")

@@ -115,50 +115,55 @@ def index():
     visible_notif = all((request.args.get("visible_notif", type=bool, default=False), current_user.is_authenticated))
     db_sess = db_session.create_session()
     if current_user.is_authenticated:
-        contacts = list(map(lambda x: ContactCard(x), db_sess.query(Chat).filter(Chat.user_id == current_user.id).all()))
-        notifications = list(map(lambda x: NoticeCard(x), db_sess.query(Notification).filter(Notification.user_id == current_user.id).all()))
+        contacts = list(map(lambda x: ContactCard(x),
+                            db_sess.query(Chat).filter(Chat.user_id == current_user.id).all()))
+        notifications = list(map(lambda x: NoticeCard(x),
+                                 db_sess.query(Notification).filter(Notification.user_id == current_user.id).all()))
     else:
         contacts = []
         notifications = []
     db_sess.close()
-    return render_template("index.html", title="Chats", contacts=contacts, notifications=notifications, notifications_default_visible=visible_notif)
+    return render_template("index.html", title="Chats", contacts=contacts, notifications=notifications,
+                           notifications_default_visible=visible_notif)
 
 
-@app.route("/chats/<int:id>", methods=['GET', 'POST'])
-def chat(id:int):
+@app.route("/chats/<int:id_>", methods=['GET', 'POST'])
+def chat_by_id(id_: int):
     visible_notif = all((request.args.get("visible_notif", type=bool, default=False), current_user.is_authenticated))
     db_sess = db_session.create_session()
     if current_user.is_authenticated:
-        if db_sess.query(Chat).get(id).user_id != current_user.id:
+        if db_sess.query(Chat).get(id_).user_id != current_user.id:
             return redirect("/")
-        contacts = list(map(lambda x: ContactCard(x), db_sess.query(Chat).filter(Chat.user_id == current_user.id).all()))
-        chat = db_sess.query(Chat).get(id)
+        contacts = list(map(lambda x: ContactCard(x),
+                            db_sess.query(Chat).filter(Chat.user_id == current_user.id).all()))
+        chat = db_sess.query(Chat).get(id_)
         forward = chat.messages if chat else []
         reverse = db_sess.query(Chat).filter(Chat.user_id == chat.contact,
                                              Chat.contact == chat.user_id).first()
         reverse = reverse.messages if reverse else []
         messages = list(sorted(forward + reverse, key=lambda x: x.date_time))
 
-        notifications = list(map(lambda x: NoticeCard(x), db_sess.query(Notification).filter(Notification.user_id == current_user.id).all()))
+        notifications = list(map(lambda x: NoticeCard(x),
+                                 db_sess.query(Notification).filter(Notification.user_id == current_user.id).all()))
 
         form = SendMessageForm()
         if form.validate_on_submit():
             message_text = form.text.data.strip()
             if not message_text:
                 db_sess.close()
-                return render_template('chat.html', id=id, title="Chats",
-                                       contacts=contacts, messages=messages, notifications=notifications, chat_id=id,
+                return render_template('chat.html', id=id_, title="Chats",
+                                       contacts=contacts, messages=messages, notifications=notifications, chat_id=id_,
                                        user_id=current_user.id, form=form, notifications_default_visible=visible_notif)
             mess = Message()
-            mess.chat_id = id
+            mess.chat_id = id_
             mess.text = message_text
             mess.date_time = datetime.datetime.now()
             db_sess.add(mess)
             db_sess.commit()
             db_sess.close()
-            return redirect(f"/chats/{id}")
-        return render_template('chat.html', id=id, title="Chats",
-                               contacts=contacts, messages=messages, notifications=notifications, chat_id=id,
+            return redirect(f"/chats/{id_}")
+        return render_template('chat.html', id=id_, title="Chats",
+                               contacts=contacts, messages=messages, notifications=notifications, chat_id=id_,
                                user_id=current_user.id, form=form, notifications_default_visible=visible_notif)
     else:
         contacts = []
@@ -218,22 +223,22 @@ def add_chat():
     return render_template("add_chat.html", title="Add chat", form=form)
 
 
-@app.route("/notif_sub_ok/<int:id>", methods=["POST", "GET"])
-def notification_submit_ok(id):
+@app.route("/notif_sub_ok/<int:id_>", methods=["POST", "GET"])
+def notification_submit_ok(id_: int):
     chat_id = request.args.get("chat", type=int, default=-1)
     db_sess = db_session.create_session()
-    if current_user.is_authenticated and current_user.id == db_sess.query(Notification).get(id).user_id:
-        db_sess.query(Notification).filter(Notification.id == id).delete()
+    if current_user.is_authenticated and current_user.id == db_sess.query(Notification).get(id_).user_id:
+        db_sess.query(Notification).filter(Notification.id == id_).delete()
         db_sess.commit()
     url = "/?visible_notif=true" if chat_id == -1 else f"/chats/{chat_id}?visible_notif=true"
     return redirect(url)
 
 
-@app.route("/notif_sub_ac/<int:id>", methods=["POST", "GET"])
-def notification_submit_ac(id):
+@app.route("/notif_sub_ac/<int:id_>", methods=["POST", "GET"])
+def notification_submit_ac(id_: int):
     chat_id = request.args.get("chat", type=int, default=-1)
     db_sess = db_session.create_session()
-    notif = db_sess.query(Notification).get(id)
+    notif = db_sess.query(Notification).get(id_)
     if current_user.is_authenticated and current_user.id == notif.user_id:
         chat = Chat(
             user_id=current_user.id,
@@ -248,17 +253,17 @@ def notification_submit_ac(id):
             sender_id=current_user.id
         )
         db_sess.add(notification)
-        db_sess.query(Notification).filter(Notification.id == id).delete()
+        db_sess.query(Notification).filter(Notification.id == id_).delete()
         db_sess.commit()
     url = "/?visible_notif=true" if chat_id == -1 else f"/chats/{chat_id}?visible_notif=true"
     return redirect(url)
 
 
-@app.route("/notif_sub_rj/<int:id>", methods=["POST", "GET"])
-def notification_submit_rj(id):
+@app.route("/notif_sub_rj/<int:id_>", methods=["POST", "GET"])
+def notification_submit_rj(id_: int):
     chat_id = request.args.get("chat", type=int, default=-1)
     db_sess = db_session.create_session()
-    notif = db_sess.query(Notification).get(id)
+    notif = db_sess.query(Notification).get(id_)
     if current_user.is_authenticated and current_user.id == notif.user_id:
         db_sess.query(Chat).filter(Chat.user_id == notif.sender_id, Chat.contact == current_user.id).delete()
         notification = Notification(
@@ -269,7 +274,7 @@ def notification_submit_rj(id):
             sender_id=current_user.id
         )
         db_sess.add(notification)
-        db_sess.query(Notification).filter(Notification.id == id).delete()
+        db_sess.query(Notification).filter(Notification.id == id_).delete()
         db_sess.commit()
     url = "/?visible_notif=true" if chat_id == -1 else f"/chats/{chat_id}?visible_notif=true"
     return redirect(url)
