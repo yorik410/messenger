@@ -1,15 +1,25 @@
 {% extends "index.html" %}
 {% block chat %}
-
+    <script>
+        function urlify(text) {
+          var urlRegex = /(https?:\/\/[^\s]+)/g;
+          document.write(text.replace(urlRegex, function(url) {
+            return '<a href="' + url + '" class="text-white">' + url + '</a>';
+          }));
+          // or alternatively
+          // return text.replace(urlRegex, '<a href="$1">$1</a>')
+        }
+    </script>
     {% for mess in messages %}
         {% if mess.chat.user_id == user_id %}
             <p class="bg-primary p-2 rounded-3" style="max-width: 68vw; word-break: break-word;
                    white-space: pre-wrap;
-                   -moz-white-space: pre-wrap;">{{ mess.text }}</p>
+                   -moz-white-space: pre-wrap;
+                    color:white;"><script>urlify("{{ mess.text }}");</script></p>
         {% else %}
             <p class="bg-dark p-2 rounded-3" style="max-width: 68vw; word-break: break-word;
                    white-space: pre-wrap;
-                   -moz-white-space: pre-wrap;">{{ mess.text }}</p>
+                   -moz-white-space: pre-wrap;"><script>urlify("{{ mess.text }}");</script></p>
         {% endif %}
     {% endfor %}
     <div id="bottom"></div>
