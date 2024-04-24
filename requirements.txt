@@ -6,3 +6,4 @@ SQLAlchemy~=2.0.27
 SQLAlchemy-serializer~=1.4.1
 werkzeug~=3.0.1
 wtforms~=3.1.2
+pillow~=10.3.0

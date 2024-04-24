@@ -37,7 +37,8 @@
                     <img src="{{ url_for('static', filename='img/notification-bell.png') }}" width="20" height="20" alt="">
                 </button>
                 <a href="/profile" style="text-decoration: none;">
-                    <img src="{{ url_for('static', filename='img/user-profile-icon.png') }}" width="40" height="40" alt="">
+                    <img src="{{ url_for('static', filename='img/user-profile-icon.png'
+                    if not avatar else 'img/avatars/#' + avatar|string + '.png') }}" width="40" height="40" alt="" class="rounded rounded-circle">
                     <span class="text-white p-3" id="name_label">{% if current_user.surname %}{{ current_user.surname }}{% endif %} {{ current_user.name }}</span>
                 </a>
                 <style>

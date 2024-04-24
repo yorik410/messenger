@@ -1,7 +1,9 @@
 from flask_wtf import FlaskForm
+from flask_wtf.file import FileAllowed
 from wtforms import PasswordField, BooleanField, SubmitField, EmailField, StringField, IntegerField, DateField, \
-    TextAreaField
+    TextAreaField, FileField
 from wtforms.validators import DataRequired
+import wtforms.validators as validators
 from werkzeug.security import check_password_hash, generate_password_hash
 
 
@@ -43,6 +45,7 @@ class RegisterForm(FlaskForm):
 
 
 class EditProfileForm(FlaskForm):
+    avatar = FileField("Avatar", validators=[FileAllowed(['jpg', 'png'], 'Images only!')])
     email = EmailField('Email', validators=[DataRequired()])
     nickname = StringField('Nickname', validators=[DataRequired()])
     surname = StringField('Surname (optional)')

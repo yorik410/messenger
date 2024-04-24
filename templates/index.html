@@ -16,7 +16,9 @@
                                 <table>
                                     <tr>
                                         <td rowspan="2">
-                                            <img src="{{ url_for('static', filename='img/user-profile-icon.png') }}" width="60" height="60" alt="">
+                                            <img src="{{ url_for('static', filename='img/user-profile-icon.png'
+                                                 if not user.avatar else 'img/avatars/#' + user.avatar|string + '.png') }}"
+                                                 width="60" height="60" alt="" class="rounded rounded-circle">
                                         </td>
                                         <td>
                                             <span class="p-1" style="margin-left: 15px; font-size: 18px;">{{ user.showed_name }}</span>

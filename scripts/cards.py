@@ -1,6 +1,7 @@
 from db_scripts.data.chats import Chat
 from db_scripts.data.messages import Message
 from db_scripts.data.users import User
+from db_scripts.data.avatars import Avatar
 from db_scripts import db_session
 import datetime
 
@@ -10,6 +11,8 @@ class ContactCard:
         db_sess = db_session.create_session()
         contact = db_sess.query(User).get(chat.contact)
         self.id = chat.id
+        avatar = db_sess.query(Avatar).filter(Avatar.user_id == contact.id).first()
+        self.avatar = avatar.id if avatar else None
         if contact.nickname:
             self.showed_name = contact.nickname
         else:

@@ -1,12 +1,14 @@
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from flask import Flask, jsonify, make_response
-from flask import render_template, redirect, request
+from flask import redirect, request
+import flask
 from db_scripts import db_session
 
 from db_scripts.data.users import User
 from db_scripts.data.chats import Chat
 from db_scripts.data.messages import Message
 from db_scripts.data.notifications import Notification
+from db_scripts.data.avatars import Avatar
 
 from db_scripts.forms.login_form import LoginForm, RegisterForm, EditProfileForm
 from db_scripts.forms.add_chat import AddChatForm
@@ -16,9 +18,11 @@ from db_scripts.forms.send_message import SendMessageForm
 from scripts.cards import ContactCard, NoticeCard
 
 import os
+import io
 import sys
 import datetime
 import signal
+from PIL import Image, ImageChops
 
 
 static_path = os.path.join("\\".join(sys.argv[0].split("\\")[:-1]), "src")
@@ -29,6 +33,15 @@ app.config['SECRET_KEY'] = 'yandexlyceum_secret_key'
 login_manager = LoginManager()
 
 login_manager.init_app(app)
+
+
+def render_template(*args, **kwargs):
+    db_sess = db_session.create_session()
+    if current_user.is_authenticated:
+        avatar = db_sess.query(Avatar).filter(Avatar.user_id == current_user.id).first()
+    else:
+        avatar = None
+    return flask.render_template(*args, **kwargs, avatar=avatar.id if avatar else None)
 
 
 @login_manager.user_loader
@@ -110,7 +123,7 @@ def register():
 
 
 @app.route("/")
-@app.route("/chats")
+@app.route("/chats", methods=["GET", "POST"])
 def index():
     visible_notif = all((request.args.get("visible_notif", type=bool, default=False), current_user.is_authenticated))
     db_sess = db_session.create_session()
@@ -122,7 +135,6 @@ def index():
     else:
         contacts = []
         notifications = []
-    db_sess.close()
     return render_template("index.html", title="Chats", contacts=contacts, notifications=notifications,
                            notifications_default_visible=visible_notif)
 
@@ -287,7 +299,31 @@ def profile():
         db_sess = db_session.create_session()
         form = EditProfileForm()
         form.email.data = current_user.email
+        avatar = db_sess.query(Avatar).filter(Avatar.user_id == current_user.id).first()
         if form.validate_on_submit():
+            if form.avatar.data:
+                image = Image.open(io.BytesIO(form.avatar.data.read()))
+                image = image.resize((532, 532))
+                if avatar:
+                    try:
+                        diff = ImageChops.difference(Image.open(f"./src/img/avatars/#{avatar.id}.png"), image).getbbox()
+                    except ValueError:
+                        diff = True
+                else:
+                    diff = True
+                try:
+                    difft = ImageChops.difference(Image.open(f"./src/img/user-profile-icon.png"), image).getbbox()
+                except ValueError:
+                    difft = True
+                if diff and difft:
+                    if not avatar:
+                        avatar = Avatar()
+                        avatar.user_id = current_user.id
+                        db_sess.add(avatar)
+                        db_sess.commit()
+                    avatar = db_sess.query(Avatar).filter(Avatar.user_id == current_user.id).first()
+                    image.save(f"./src/img/avatars/#{avatar.id}.png")
+
             temp = ["email", "nickname", "name", "surname", "age"]
             for i in temp:
                 if (eval(f"form.{i}.data") != eval(f"current_user.{i}") and not (eval(f"current_user.{i}") is None
@@ -326,7 +362,7 @@ def profile():
             form.name.data = current_user.name
             form.surname.data = current_user.surname if current_user.surname else ""
             form.age.data = current_user.age
-        return render_template("profile.html", title="Profile", edit=edit, form=form)
+            return render_template("profile.html", title="Profile", edit=edit, form=form)
     return redirect("/")
 
 

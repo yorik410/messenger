@@ -1,11 +1,53 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <div class="bg-dark p-3 rounded-3" style="width: 50vw; transform: translate(50%, 0);">
+<div class="bg-dark p-3 rounded-3" style="width: 50vw; transform: translate(50%, 0);"
+     xmlns="http://www.w3.org/1999/html">
         {% if edit %}<h1>Edit profile</h1>{% else %}<h1>Your profile</h1>{% endif %}
-        <form action="" method="post">
+        <form action="" method="post" enctype="multipart/form-data">
             {{ form.hidden_tag() }}
-
+            <p>
+                {{ form.avatar.label }}<br>
+                <table>
+                    <tr>
+                        <td>
+                            <label for="avatar"><img src="{{ url_for('static', filename='img/user-profile-icon.png'
+                                                            if not avatar else 'img/avatars/#' + avatar|string + '.png') }}"
+                                                     style="width: 14vw; margin-right: 50%; margin-bottom:10px; aspect-ratio: 1 / 1;"
+                                                     id="target" class="rounded rounded-circle"></label>
+                        </td>
+                    </tr> {% if edit %} <tr>
+                        <td>
+                            <center>
+                                <label for="avatar" class="btn btn-warning" style="width: 10vw;">Change avatar</label>
+                            </center>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <span>*it's better to use square images</span>
+                        </td>
+                    </tr>{% endif %}
+                </table>
+                {{ form.avatar(class="form-control", style="display:none;", disabled=not edit, readonly=not edit,
+                                **{'onchange':'showImage()'}) }}<br>
+                {% for error in form.avatar.errors %}
+                    <p class="alert alert-danger" role="alert">
+                        {{ error }}
+                    </p>
+                {% endfor %}
+                <script>
+                    function showImage() {
+                        var imgField = document.getElementById("avatar");
+                        var target = document.getElementById("target");
+                        var fr=new FileReader();
+                        fr.onload = function (e) {
+                            target.src = this.result;
+                        };
+                        fr.readAsDataURL(imgField.files[0]);
+                    }
+                </script>
+            </p>
             <p>
                 {{ form.email.label }}<br>
                 {{ form.email(class="form-control", type="email", disabled=True, readonly=True) }}<br>
