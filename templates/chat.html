@@ -30,6 +30,15 @@
                     {{ form.submit(type="submit", class="btn btn-primary", autofocus=True) }}
                 </td>
             </tr>
+            <tr>
+                <td>
+                    {% for error in form.text.errors %}
+                    <div class="alert alert-danger" role="alert">
+                        {{ error }}
+                    </div>
+                    {% endfor %}
+                </td>
+            </tr>
         </table>
         <script>
             const form = document.getElementById('f1');
